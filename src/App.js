@@ -27,9 +27,8 @@ class App extends Component {
 
   modalToggle = e => {
     console.log(e.target);
-    this.setState(({ showModal, modalImage }) => ({
+    this.setState(({ showModal }) => ({
       showModal: !showModal,
-      modalImage: e.target.dataset.src || e.target.src,
     }));
   };
 
