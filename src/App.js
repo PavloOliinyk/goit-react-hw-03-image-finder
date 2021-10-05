@@ -13,6 +13,7 @@ class App extends Component {
   state = {
     images: [],
     showModal: false,
+    modalImage: '',
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -24,8 +25,12 @@ class App extends Component {
     }
   }
 
-  modalToggle = () => {
-    this.setState(({ showModal }) => ({ showModal: !showModal }));
+  modalToggle = e => {
+    console.log(e.target);
+    this.setState(({ showModal, modalImage }) => ({
+      showModal: !showModal,
+      modalImage: e.target.dataset.src || e.target.src,
+    }));
   };
 
   handleSumbit = value => {
@@ -65,7 +70,12 @@ class App extends Component {
         )}
         {/* <Loader /> */}
 
-        {this.state.showModal && <Modal onModalClick={this.modalToggle} />}
+        {this.state.showModal && (
+          <Modal
+            largeImg={this.state.modalImage}
+            onModalClick={this.modalToggle}
+          />
+        )}
       </div>
     );
   }

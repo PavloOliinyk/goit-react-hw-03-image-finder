@@ -6,7 +6,7 @@ class ImageGalleryItem extends Component {
     const { image, modalImage, description } = this.props;
 
     return (
-      <li className={s.ImageGalleryItem}>
+      <li className={s.ImageGalleryItem} onClick={this.props.onModalClick}>
         <img
           src={image}
           data-src={modalImage}
