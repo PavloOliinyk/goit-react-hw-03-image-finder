@@ -1,16 +1,32 @@
-// import { Component } from "react";
-// import s from "./Modal.module.css";
+import { Component } from 'react';
+import s from './Modal.module.css';
 
-// class Modal extends Component {
-//   render() {
-//     return (
-//       <div className={s.Overlay}>
-//         <div className={s.Modal}>
-//           <img src="" alt="" />
-//         </div>
-//       </div>
-//     );
-//   }
-// }
+class Modal extends Component {
+  componentDidMount() {
+    window.addEventListener('keydown', this.closeModalByEsc);
+  }
 
-// export default Modal;
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.closeModalByEsc);
+  }
+
+  closeModalByEsc = e => {
+    if (e.code !== 'Escape') {
+      return;
+    }
+
+    this.props.onModalClick();
+  };
+
+  render() {
+    return (
+      <div className={s.Overlay} onClick={this.props.onModalClick}>
+        <div className={s.Modal}>
+          <img src="" alt="" />
+        </div>
+      </div>
+    );
+  }
+}
+
+export default Modal;

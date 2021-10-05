@@ -1,48 +1,52 @@
-import { Component } from "react";
-import ImageGallery from "./ImageGallery";
-import Searchbar from "./Searchbar";
+import { Component } from 'react';
+import ImageGallery from './ImageGallery';
+import Searchbar from './Searchbar';
 // import Loader from "./Loader";
-import Button from "./Button";
-// import Modal from "./Modal";
-import ImageApi from "./api/imageApi";
-import s from "./App.module.css";
+import Button from './Button';
+import Modal from './Modal';
+import ImageApi from './api/imageApi';
+import s from './App.module.css';
 
 const image = new ImageApi();
 
 class App extends Component {
   state = {
-    images: []
+    images: [],
+    showModal: false,
   };
 
-  handleSumbit = (value) => {
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState !== this.state && this.state.images.length > 12) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }
+
+  modalToggle = () => {
+    this.setState(({ showModal }) => ({ showModal: !showModal }));
+  };
+
+  handleSumbit = value => {
     image.resetPage();
     image.query = value;
-    image.fetchImageOrPhoto().then((images) => this.setState({ images }));
+    image.fetchImageOrPhoto().then(images => this.setState({ images }));
     image.incrementpage();
   };
 
-  componentDidMount() {
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: "smooth"
-    });
-  }
-
-  componentDidUpdate() {
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: "smooth"
-    });
-  }
-
   loadMoreImages = () => {
-    image.fetchImageOrPhoto().then((newImages) =>
+    image.fetchImageOrPhoto().then(newImages => {
+      if (!newImages.length) {
+        return;
+      }
+
       this.setState(({ images }) => {
         return {
-          images: [...images, ...newImages]
+          images: [...images, ...newImages],
         };
-      })
-    );
+      });
+    });
     image.incrementpage();
   };
 
@@ -51,11 +55,17 @@ class App extends Component {
       <div className={s.App}>
         <Searchbar onSubmit={this.handleSumbit} />
         {this.state.images.length > 1 && (
-          <ImageGallery images={this.state.images} />
+          <>
+            <ImageGallery
+              images={this.state.images}
+              onModalClick={this.modalToggle}
+            />
+            <Button onSearch={this.loadMoreImages} />
+          </>
         )}
         {/* <Loader /> */}
-        <Button onSearch={this.loadMoreImages} />
-        {/* <Modal /> */}
+
+        {this.state.showModal && <Modal onModalClick={this.modalToggle} />}
       </div>
     );
   }
