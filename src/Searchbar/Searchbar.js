@@ -9,7 +9,7 @@ class Searchbar extends Component {
   handleChahge = (e) => {
     const { name, value } = e.target;
 
-    this.setState({ [name]: value });
+    this.setState({ [name]: value.toLowerCase() });
   };
 
   handleSubmit = (e) => {

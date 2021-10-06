@@ -1,6 +1,6 @@
-import { Component } from 'react';
-import ImageGalleryItem from '../ImageGalleryItem';
-import s from './ImageGallery.module.css';
+import { Component } from "react";
+import ImageGalleryItem from "../ImageGalleryItem";
+import s from "./ImageGallery.module.css";
 
 class ImageGallery extends Component {
   render() {
@@ -12,7 +12,7 @@ class ImageGallery extends Component {
             key={id}
             image={webformatURL}
             modalImage={largeImageURL}
-            description={tags.split(',')[0]}
+            description={tags.split(",")[0]}
           />
         ))}
       </ul>
