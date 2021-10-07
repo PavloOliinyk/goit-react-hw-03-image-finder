@@ -1,87 +1,90 @@
-import { Component } from "react";
-import Loader from "react-loader-spinner";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.min.css";
-import ImageGallery from "./ImageGallery";
-import Searchbar from "./Searchbar";
-import Button from "./Button";
-import Modal from "./Modal";
-import ImageApi from "./api/imageApi";
-import "./App.css";
-import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+import { Component } from 'react';
+import Loader from 'react-loader-spinner';
+import { ToastContainer, toast } from 'react-toastify';
+import ImageGallery from './ImageGallery';
+import Searchbar from './Searchbar';
+import Button from './Button';
+import Modal from './Modal';
+import ImageApi from './api/imageApi';
+import './App.css';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 
 const image = new ImageApi();
 
 class App extends Component {
   state = {
-    query: "",
+    query: '',
     images: [],
+    totalImages: null,
     showModal: false,
-    modalImage: "",
-    modalAltText: "",
+    modalImage: '',
+    modalAltText: '',
     showLoader: false,
-    error: null
+    error: null,
+    disableLoadMoreButton: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.query !== this.state.query) {
-      this.setState({ showLoader: true });
+      this.setState({ showLoader: true, disableLoadMoreButton: false });
       image.resetPage();
       image.query = this.state.query;
       image
         .fetchImageOrPhoto()
-        .then((images) => {
-          if (!images.length) {
-            toast.info("Enter proper query");
+        .then(({ hits, totalHits }) => {
+          if (!hits.length) {
+            toast.error('Enter proper query', { theme: 'colored' });
           }
-          this.setState({ images });
+          this.setState({ images: hits, totalImages: totalHits });
         })
-        .catch((error) => {
+        .catch(error => {
           this.setState({ error });
-          toast.error(this.state.error.message);
+          toast.error(this.state.error.message, { theme: 'colored' });
         })
         .finally(() => this.setState({ showLoader: false }));
       image.incrementpage();
     }
   }
 
-  modalToggle = (e) => {
+  modalToggle = e => {
     this.setState(({ showModal }) => ({
       showModal: !showModal,
-      modalImage: !showModal ? e.target.dataset.src : "",
-      modalAltText: !showModal ? e.target.alt : ""
+      modalImage: !showModal ? e.target.dataset.src : '',
+      modalAltText: !showModal ? e.target.alt : '',
     }));
   };
 
-  handleSumbit = (value) => {
+  handleSumbit = value => {
     this.setState({ query: value, images: [] });
   };
 
   loadMoreImages = () => {
+    if (this.state.totalImages === this.state.images.length) {
+      this.setState({ disableLoadMoreButton: true });
+      toast.warn('No more images to show', { theme: 'colored' });
+      return;
+    }
+
     this.setState({ showLoader: true });
     image
       .fetchImageOrPhoto()
-      .then((newImages) => {
-        if (!newImages.length) {
-          toast.warn("No more images to show");
-          return;
-        }
-
+      .then(({ hits }) => {
         this.setState(({ images }) => {
           return {
-            images: [...images, ...newImages]
+            images: [...images, ...hits],
           };
         });
+
+        image.incrementpage();
       })
       .finally(() => {
         window.scrollTo({
           top: document.documentElement.scrollHeight,
-          behavior: "smooth"
+          behavior: 'smooth',
         });
+
         this.setState({ showLoader: false });
       });
-
-    image.incrementpage();
   };
 
   render() {
@@ -97,7 +100,10 @@ class App extends Component {
                 onModalClick={this.modalToggle}
               />
               {!this.state.showLoader && (
-                <Button onSearch={this.loadMoreImages} />
+                <Button
+                  disabled={this.state.disableLoadMoreButton}
+                  onSearch={this.loadMoreImages}
+                />
               )}
             </>
           )}
@@ -108,7 +114,7 @@ class App extends Component {
               height={80}
               width={80}
               timeout={3000}
-              style={{ textAlign: "center" }}
+              style={{ textAlign: 'center' }}
             />
           )}
 
@@ -120,7 +126,12 @@ class App extends Component {
             />
           )}
         </div>
-        <ToastContainer />
+        <ToastContainer
+          autoClose={3000}
+          pauseOnFocusLoss={false}
+          draggable={false}
+          pauseOnHover={false}
+        />
       </>
     );
   }
