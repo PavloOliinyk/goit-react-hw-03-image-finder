@@ -71,6 +71,10 @@ class App extends Component {
   };
 
   handleSumbit = value => {
+    if (value === '') {
+      toast.error('No query entered yet...', { theme: 'colored' });
+      return;
+    }
     this.setState({ query: value, images: [], currentPage: 1 });
   };
 
