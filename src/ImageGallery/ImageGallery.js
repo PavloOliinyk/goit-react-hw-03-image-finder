@@ -7,15 +7,17 @@ class ImageGallery extends Component {
   render() {
     return (
       <ul className={s.ImageGallery}>
-        {this.props.images.map(({ id, webformatURL, largeImageURL, tags }) => (
-          <ImageGalleryItem
-            onModalClick={this.props.onModalClick}
-            key={`${id}-${uuidv4()}`}
-            image={webformatURL}
-            modalImage={largeImageURL}
-            description={tags.split(',')[0]}
-          />
-        ))}
+        {this.props.images.map(
+          ({ id, webformatURL, largeImageURL, tags }, index) => (
+            <ImageGalleryItem
+              onModalClick={() => this.props.onModalClick(index)}
+              key={`${id}-${uuidv4()}`}
+              image={webformatURL}
+              modalImage={largeImageURL}
+              description={tags.split(',')[0]}
+            />
+          ),
+        )}
       </ul>
     );
   }

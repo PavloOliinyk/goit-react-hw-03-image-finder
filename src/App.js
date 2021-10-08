@@ -18,10 +18,9 @@ class App extends Component {
     currentPage: 1,
     totalImages: null,
     showModal: false,
-    modalImage: '',
-    modalAltText: '',
     showLoader: false,
     error: null,
+    activeImageIndex: undefined,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -62,11 +61,10 @@ class App extends Component {
     }
   }
 
-  modalToggle = e => {
+  modalToggle = index => {
     this.setState(({ showModal }) => ({
       showModal: !showModal,
-      modalImage: !showModal ? e.target.dataset.src : '',
-      modalAltText: !showModal ? e.target.alt : '',
+      activeImageIndex: index,
     }));
   };
 
@@ -75,6 +73,7 @@ class App extends Component {
       toast.error('No query entered yet...', { theme: 'colored' });
       return;
     }
+
     this.setState({ query: value, images: [], currentPage: 1 });
   };
 
@@ -106,6 +105,7 @@ class App extends Component {
               )}
             </>
           )}
+
           {this.state.showLoader && (
             <Loader
               type="ThreeDots"
@@ -119,12 +119,12 @@ class App extends Component {
 
           {this.state.showModal && (
             <Modal
-              modalImage={this.state.modalImage}
-              modalAltText={this.state.modalAltText}
+              currentImage={this.state.images[this.state.activeImageIndex]}
               onModalClick={this.modalToggle}
             />
           )}
         </div>
+
         <ToastContainer
           autoClose={3000}
           pauseOnFocusLoss={false}
