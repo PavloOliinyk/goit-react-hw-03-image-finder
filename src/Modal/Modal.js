@@ -1,7 +1,13 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 import s from './Modal.module.css';
 
 class Modal extends Component {
+  static propTypes = {
+    onModalClick: PropTypes.func.isRequired,
+    currentImage: PropTypes.object.isRequired,
+  };
+
   componentDidMount() {
     window.addEventListener('keydown', this.closeModalByEsc);
   }

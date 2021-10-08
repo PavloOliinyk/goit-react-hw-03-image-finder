@@ -1,18 +1,23 @@
-import { Component } from "react";
-import s from "./Searchbar.module.css";
+import { Component } from 'react';
+import PropTypes from 'prop-types';
+import s from './Searchbar.module.css';
 
 class Searchbar extends Component {
-  state = {
-    query: ""
+  static propTypes = {
+    onSubmit: PropTypes.func.isRequired,
   };
 
-  handleChahge = (e) => {
+  state = {
+    query: '',
+  };
+
+  handleChahge = e => {
     const { name, value } = e.target;
 
     this.setState({ [name]: value.toLowerCase() });
   };
 
-  handleSubmit = (e) => {
+  handleSubmit = e => {
     e.preventDefault();
 
     this.props.onSubmit(this.state.query);
