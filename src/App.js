@@ -15,34 +15,50 @@ class App extends Component {
   state = {
     query: '',
     images: [],
+    currentPage: 1,
     totalImages: null,
     showModal: false,
     modalImage: '',
     modalAltText: '',
     showLoader: false,
     error: null,
-    disableLoadMoreButton: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.query !== this.state.query) {
-      this.setState({ showLoader: true, disableLoadMoreButton: false });
-      image.resetPage();
-      image.query = this.state.query;
+    if (
+      prevState.query !== this.state.query ||
+      prevState.currentPage !== this.state.currentPage
+    ) {
+      this.setState({ showLoader: true });
+
       image
-        .fetchImageOrPhoto()
+        .fetchImageOrPhoto(this.state.query, this.state.currentPage)
         .then(({ hits, totalHits }) => {
           if (!hits.length) {
             toast.error('Enter proper query', { theme: 'colored' });
           }
-          this.setState({ images: hits, totalImages: totalHits });
+
+          this.setState(({ images }) => {
+            return {
+              images: [...images, ...hits],
+              totalImages: totalHits,
+            };
+          });
         })
         .catch(error => {
           this.setState({ error });
           toast.error(this.state.error.message, { theme: 'colored' });
         })
-        .finally(() => this.setState({ showLoader: false }));
-      image.incrementpage();
+        .finally(() => {
+          if (prevState.images.length > 11) {
+            window.scrollTo({
+              top: document.documentElement.scrollHeight,
+              behavior: 'smooth',
+            });
+          }
+
+          this.setState({ showLoader: false });
+        });
     }
   }
 
@@ -55,36 +71,18 @@ class App extends Component {
   };
 
   handleSumbit = value => {
-    this.setState({ query: value, images: [] });
+    this.setState({ query: value, images: [], currentPage: 1 });
   };
 
-  loadMoreImages = () => {
-    if (this.state.totalImages === this.state.images.length) {
-      this.setState({ disableLoadMoreButton: true });
-      toast.warn('No more images to show', { theme: 'colored' });
+  loadMoreImages = e => {
+    e.preventDefault();
+
+    if (this.state.images.length === this.state.totalImages) {
+      toast.error('There is no more images to show', { theme: 'colored' });
       return;
     }
 
-    this.setState({ showLoader: true });
-    image
-      .fetchImageOrPhoto()
-      .then(({ hits }) => {
-        this.setState(({ images }) => {
-          return {
-            images: [...images, ...hits],
-          };
-        });
-
-        image.incrementpage();
-      })
-      .finally(() => {
-        window.scrollTo({
-          top: document.documentElement.scrollHeight,
-          behavior: 'smooth',
-        });
-
-        this.setState({ showLoader: false });
-      });
+    this.setState(({ currentPage }) => ({ currentPage: currentPage + 1 }));
   };
 
   render() {
@@ -100,10 +98,7 @@ class App extends Component {
                 onModalClick={this.modalToggle}
               />
               {!this.state.showLoader && (
-                <Button
-                  disabled={this.state.disableLoadMoreButton}
-                  onSearch={this.loadMoreImages}
-                />
+                <Button onSearch={this.loadMoreImages} />
               )}
             </>
           )}

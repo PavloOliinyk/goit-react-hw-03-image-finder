@@ -4,12 +4,7 @@ import s from './Button.module.css';
 class Button extends Component {
   render() {
     return (
-      <button
-        type="button"
-        disabled={this.props.disabled}
-        className={s.Button}
-        onClick={this.props.onSearch}
-      >
+      <button type="button" className={s.Button} onClick={this.props.onSearch}>
         Load more
       </button>
     );
