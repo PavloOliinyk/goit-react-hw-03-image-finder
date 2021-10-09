@@ -20,44 +20,44 @@ class App extends Component {
     showModal: false,
     showLoader: false,
     error: null,
-    activeImageIndex: undefined,
+    activeImageIndex: null,
   };
 
-  componentDidUpdate(prevProps, prevState) {
+  async componentDidUpdate(prevProps, prevState) {
     if (
       prevState.query !== this.state.query ||
       prevState.currentPage !== this.state.currentPage
     ) {
-      this.setState({ showLoader: true });
+      try {
+        this.setState({ showLoader: true });
+        const { hits, totalHits } = await image.fetchImageOrPhoto(
+          this.state.query,
+          this.state.currentPage,
+        );
 
-      image
-        .fetchImageOrPhoto(this.state.query, this.state.currentPage)
-        .then(({ hits, totalHits }) => {
-          if (!hits.length) {
-            toast.error('Enter proper query', { theme: 'colored' });
-          }
+        if (!hits.length) {
+          toast.error('Enter proper query', { theme: 'colored' });
+        }
 
-          this.setState(({ images }) => {
-            return {
-              images: [...images, ...hits],
-              totalImages: totalHits,
-            };
-          });
-        })
-        .catch(error => {
-          this.setState({ error });
-          toast.error(this.state.error.message, { theme: 'colored' });
-        })
-        .finally(() => {
-          if (prevState.images.length > 11) {
-            window.scrollTo({
-              top: document.documentElement.scrollHeight,
-              behavior: 'smooth',
-            });
-          }
-
-          this.setState({ showLoader: false });
+        this.setState(({ images }) => {
+          return {
+            images: [...images, ...hits],
+            totalImages: totalHits,
+          };
         });
+      } catch (error) {
+        this.setState({ error });
+        toast.error(this.state.error.message, { theme: 'colored' });
+      } finally {
+        if (prevState.images.length > 11) {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth',
+          });
+        }
+
+        this.setState({ showLoader: false });
+      }
     }
   }
 
@@ -78,8 +78,6 @@ class App extends Component {
   };
 
   loadMoreImages = e => {
-    e.preventDefault();
-
     if (this.state.images.length === this.state.totalImages) {
       toast.error('There is no more images to show', { theme: 'colored' });
       return;
